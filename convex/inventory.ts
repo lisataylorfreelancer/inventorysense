@@ -66,36 +66,15 @@ export const listReports = query({
       .collect();
   },
 });
-export const getDemandStats = query({
-  args: {},
-  handler: async (ctx) => {
-    // Generate 30 days of mock time-series data for the dashboard chart
-    const data = [];
-    const now = new Date();
-    for (let i = 29; i >= 0; i--) {
-      const date = new Date(now);
-      date.setDate(date.getDate() - i);
-      // Create a somewhat realistic fluctuating trend
-      const base = 50 + Math.sin(i * 0.5) * 20;
-      const noise = Math.random() * 15;
-      data.push({
-        date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        score: Math.min(100, Math.max(0, Math.floor(base + noise))),
-      });
-    }
-    return data;
-  },
-});
 export const generateMockAlerts = mutation({
   args: { niche: v.string() },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
     const mockData = [
-      { productName: `Viral ${args.niche} Accessory`, confidenceScore: 88, reason: "Sudden 300% spike in TikTok mentions over last 48h. High velocity sentiment." },
-      { productName: `Eco-friendly ${args.niche} Kit`, confidenceScore: 74, reason: "Search volume increasing on Etsy for handmade variants. Predicted 15% growth." },
-      { productName: `Retro ${args.niche} Aesthetic`, confidenceScore: 92, reason: "High engagement on Instagram reels using specific niche hashtags. Consumer sentiment: Positive." },
-      { productName: `Limited Edition ${args.niche} Tool`, confidenceScore: 65, reason: "Niche influencer mentions detected. Low current marketplace saturation." },
+      { productName: `Viral ${args.niche} Accessory`, confidenceScore: 88, reason: "Sudden 300% spike in TikTok mentions over last 48h." },
+      { productName: `Eco-friendly ${args.niche} Kit`, confidenceScore: 74, reason: "Search volume increasing on Etsy for handmade variants." },
+      { productName: `Retro ${args.niche} Aesthetic`, confidenceScore: 92, reason: "High engagement on Instagram reels using specific niche hashtags." },
     ];
     for (const item of mockData) {
       await ctx.db.insert("alerts", {
@@ -127,28 +106,25 @@ export const saveTrendReportInternal = internalMutation({
   },
 });
 export const generateTrendReport = action({
-  args: { niche: v.string(), keyword: v.optional(v.string()), platforms: v.optional(v.array(v.string())) },
+  args: { niche: v.string(), keyword: v.optional(v.string()) },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
     const apiKey = process.env.ANDROMO_AI_API_KEY;
-    if (!apiKey) throw new Error("AI integration is not configured. Please set up AI integration using the 'add_ai_tool' or contact support to provision an API key.");
-    const platformContext = args.platforms?.length ? `Focus on data from: ${args.platforms.join(", ")}.` : "";
-    const prompt = `Act as an expert e-commerce trend analyst. Provide a deep-dive trend report for the niche: "${args.niche}" ${args.keyword ? `specifically focusing on "${args.keyword}"` : ""}.
-    ${platformContext}
+    if (!apiKey) throw new Error("AI integration missing");
+    const prompt = `Act as an expert e-commerce trend analyst. Provide a deep-dive trend report for the niche: "${args.niche}" ${args.keyword ? `specifically focusing on "${args.keyword}"` : ""}. 
     Include:
-    1. MARKET SENTIMENT ANALYSIS
-    2. RISING KEYWORDS & HASHTAGS
-    3. SOURCING RECOMMENDATIONS
-    4. PREDICTED DEMAND FOR NEXT 30 DAYS
-    Keep the tone professional and data-driven. Use plain text formatting with clear bold headings and bullet points. Do not use markdown symbols, use CAPS for headings.`;
+    1. Market Sentiment Analysis
+    2. Rising Keywords & Hashtags
+    3. Sourcing Recommendations
+    4. Predicted Demand for next 30 days.
+    Keep the tone professional and data-driven. Use plain text formatting with clear sections.`;
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${apiKey}`,
         "X-Title": "InventorySense Analyst",
-        "User-Agent": "Andromo/1.0",
       },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash-lite",
@@ -157,15 +133,12 @@ export const generateTrendReport = action({
         temperature: 0.7,
       }),
     });
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`OpenRouter API error (${response.status}): ${errorText}`);
-    }
+    if (!response.ok) throw new Error(`AI API Error: ${response.status}`);
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "Analysis unavailable.";
     await ctx.runMutation(internal.inventory.saveTrendReportInternal, {
       userId,
-      title: `${args.niche}${args.keyword ? ` (${args.keyword})` : ""} - Analysis`,
+      title: `${args.niche} - ${new Date().toLocaleDateString()} Analysis`,
       content,
       niche: args.niche,
     });

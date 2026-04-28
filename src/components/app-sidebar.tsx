@@ -1,5 +1,5 @@
 import React from "react";
-import { Home, MessageSquare } from "lucide-react";
+import { LayoutDashboard, FileText, Settings, MessageSquare, Home } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -12,23 +12,25 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-
 const navItems = [
-  { label: "Home", path: "/", icon: Home },
-  { label: "AI Chat", path: "/ai-chat", icon: MessageSquare },
+  { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+  { label: "Trend Reports", path: "/reports", icon: FileText },
+  { label: "Settings", path: "/settings", icon: Settings },
+  { label: "AI Support", path: "/ai-chat", icon: MessageSquare },
+  { label: "Landing", path: "/", icon: Home },
 ];
-
 export function AppSidebar(): JSX.Element {
   const { pathname } = useLocation();
-
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="flex items-center gap-2 px-2 py-1">
-          <div className="h-6 w-6 rounded-md bg-gradient-to-br from-indigo-500 to-purple-500" />
-          <span className="text-sm font-medium">AI Chat</span>
+        <div className="flex items-center gap-2 px-2 py-4">
+          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
+            <LayoutDashboard className="text-white h-5 w-5" />
+          </div>
+          <span className="text-lg font-bold tracking-tight">InventorySense</span>
         </div>
-        <SidebarInput placeholder="Search" />
+        <SidebarInput placeholder="Search trends..." />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -44,7 +46,12 @@ export function AppSidebar(): JSX.Element {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <div className="px-2 text-xs text-muted-foreground">AI Chat App</div>
+        <div className="px-4 py-4">
+          <div className="p-3 bg-accent rounded-lg border border-border">
+            <p className="text-xs font-semibold text-foreground">Pro Account</p>
+            <p className="text-[10px] text-muted-foreground mt-1">Unlimited AI Reports Enabled</p>
+          </div>
+        </div>
       </SidebarFooter>
     </Sidebar>
   );
