@@ -111,7 +111,7 @@ export const generateTrendReport = action({
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
     const apiKey = process.env.ANDROMO_AI_API_KEY;
-    if (!apiKey) throw new Error("AI integration missing");
+    if (!apiKey) throw new Error("AI integration is not configured. Please set up AI integration using the 'add_ai_tool' or contact support to provision an API key.");
     const prompt = `Act as an expert e-commerce trend analyst. Provide a deep-dive trend report for the niche: "${args.niche}" ${args.keyword ? `specifically focusing on "${args.keyword}"` : ""}. 
     Include:
     1. Market Sentiment Analysis
@@ -133,7 +133,10 @@ export const generateTrendReport = action({
         temperature: 0.7,
       }),
     });
-    if (!response.ok) throw new Error(`AI API Error: ${response.status}`);
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`OpenRouter API error (${response.status}): ${errorText}`);
+    }
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "Analysis unavailable.";
     await ctx.runMutation(internal.inventory.saveTrendReportInternal, {

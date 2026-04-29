@@ -1,5 +1,12 @@
 import React from "react";
-import { LayoutDashboard, FileText, Settings, MessageSquare, Home } from "lucide-react";
+import { 
+  LayoutDashboard, 
+  FileText, 
+  Settings, 
+  MessageSquare, 
+  Home, 
+  Zap 
+} from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -26,7 +33,7 @@ export function AppSidebar(): JSX.Element {
       <SidebarHeader>
         <div className="flex items-center gap-2 px-2 py-4">
           <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
-            <LayoutDashboard className="text-white h-5 w-5" />
+            <Zap className="text-white h-5 w-5" />
           </div>
           <span className="text-lg font-bold tracking-tight">InventorySense</span>
         </div>
@@ -38,7 +45,10 @@ export function AppSidebar(): JSX.Element {
             {navItems.map((item) => (
               <SidebarMenuItem key={item.path}>
                 <SidebarMenuButton asChild isActive={pathname === item.path}>
-                  <Link to={item.path}><item.icon /> <span>{item.label}</span></Link>
+                  <Link to={item.path}>
+                    <item.icon className="h-4 w-4" />
+                    <span>{item.label}</span>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
