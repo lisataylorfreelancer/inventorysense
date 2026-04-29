@@ -2,7 +2,7 @@
 
 This is a production-ready, full-stack AI Chat application built on a modern, serverless technology stack. It provides a clean, responsive user interface for interacting with AI models, complete with secure user authentication and chat history management.
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/lisataylorfreelancer/inventorysense)
 
 ## Key Features
 
@@ -118,7 +118,7 @@ This project is configured for seamless deployment to Cloudflare Pages.
 
 You can deploy this application to Cloudflare with a single click.
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/lisataylorfreelancer/inventorysense)
 
 ### Manual Deployment via Wrangler
 
